@@ -1,0 +1,9 @@
+#########################################
+# spring profiles configuration
+#########################################
+spring:
+  profiles:
+#    active: @env@
+    active: dev
+#    active: test
+#    active: prod
