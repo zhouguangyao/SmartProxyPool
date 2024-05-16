@@ -1,4 +1,4 @@
-package com.spp.starter.config;
+package com.spp.config;
 
 import com.spp.core.ProxyIpCrawlerManager;
 import com.spp.core.annotation.ProxyIpCrawler;
