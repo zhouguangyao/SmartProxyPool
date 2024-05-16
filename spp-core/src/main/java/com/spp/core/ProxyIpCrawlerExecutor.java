@@ -39,6 +39,11 @@ public class ProxyIpCrawlerExecutor {
 
     private Lockable lockable;
 
+    public ProxyIpCrawlerExecutor(ProxyIpPool proxyIpPool, Lockable lockable) {
+        this.proxyIpPool = proxyIpPool;
+        this.lockable = lockable;
+    }
+
     ExecutorService executorService = new ThreadPoolExecutor(
             5,
             200,
@@ -66,7 +71,7 @@ public class ProxyIpCrawlerExecutor {
             try {
                 future.get();
             } catch (Exception e) {
-                log.error("crawler execute error：{}", e.getMessage());
+                log.error("crawler execute error：{}", e);
             }
         });
     }
@@ -88,7 +93,7 @@ public class ProxyIpCrawlerExecutor {
         try {
             future.get();
         } catch (Exception e) {
-            log.error("crawler execute error：{}", e.getMessage());
+            log.error("crawler execute error：{}", e);
         }
     }
 
@@ -212,7 +217,7 @@ public class ProxyIpCrawlerExecutor {
                         })
                         .filter(ObjectUtil::isNotEmpty)
                         .collect(Collectors.toList());
-            } catch (IOException e) {
+            } catch (Exception e) {
                 log.error("抓取「{}」{}, 失败：{}", name, url, e);
             }
 
@@ -244,6 +249,7 @@ public class ProxyIpCrawlerExecutor {
         IpValueParserEnum ipValueParser = annotation.ipValueParser();
         PortValueParserEnum portValueParser = annotation.portValueParser();
 
+        log.info("抓取「{}」{}", annotation.name(), url);
         Connection connect = Jsoup.connect(url);
         Document doc = connect.get();
 

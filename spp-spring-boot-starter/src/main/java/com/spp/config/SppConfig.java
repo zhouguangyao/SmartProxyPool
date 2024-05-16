@@ -1,4 +1,4 @@
-package com.spp.starter.config;
+package com.spp.config;
 
 /**
  * 〈功能概述〉

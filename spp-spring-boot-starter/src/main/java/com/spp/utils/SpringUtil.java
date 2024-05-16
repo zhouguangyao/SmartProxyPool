@@ -1,4 +1,4 @@
-package com.spp.starter.utils;
+package com.spp.utils;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;

@@ -1,13 +1,14 @@
-package com.spp.starter.config;
+package com.spp.config;
 
 
-import com.spp.starter.utils.SpringUtil;
+import com.spp.utils.SpringUtil;
 import com.spp.core.Lockable;
 import com.spp.core.MemLock;
 import com.spp.core.ProxyIpMemPool;
 import com.spp.core.ProxyIpPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -25,26 +26,15 @@ public class SppAutoConfig {
     private static final Logger log = LoggerFactory.getLogger(SppAutoConfig.class);
 
     @Bean
+    @ConditionalOnMissingBean(ProxyIpPool.class)
     public ProxyIpPool getProxyIpPool() {
-//        ProxyIpPool pool = SpringUtil.getBean(ProxyIpPool.class);
-//        // 如果没有配置ProxyIpPool，则默认使用ProxyIpMemPool
-//        if (pool == null) {
-//            pool = new ProxyIpMemPool();
-//        }
-
-        ProxyIpPool pool = new ProxyIpMemPool();
-        return pool;
+        return new ProxyIpMemPool();
     }
 
     @Bean
+    @ConditionalOnMissingBean(Lockable.class)
     public Lockable getLockable() {
-//        Lockable lockable = SpringUtil.getBean(Lockable.class);
-//        // 如果没有配置Lockable，则默认使用MemLock
-//        if (lockable == null) {
-//            lockable = new MemLock();
-//        }
-        Lockable lockable = new MemLock();
-        return lockable;
+        return new MemLock();
     }
 
 }

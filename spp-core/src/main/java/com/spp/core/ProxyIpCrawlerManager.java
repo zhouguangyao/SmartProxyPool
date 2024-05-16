@@ -21,8 +21,6 @@ import java.util.Map;
 public class ProxyIpCrawlerManager {
     private static final Logger log = LoggerFactory.getLogger(ProxyIpCrawlerManager.class);
 
-    private ProxyIpCrawlerExecutor proxyIpCrawlerExecutor;
-
     private static ProxyIpCrawlerManager instance;
 
     private static Map<String, ProxyIpCrawlerContext> crawlerMap = new HashMap<>();
@@ -30,14 +28,11 @@ public class ProxyIpCrawlerManager {
 
     public static ProxyIpCrawlerManager getInstance() {
         if (instance == null) {
-            instance = new ProxyIpCrawlerManager(new ProxyIpCrawlerExecutor());
+            instance = new ProxyIpCrawlerManager();
         }
         return instance;
     }
 
-    public ProxyIpCrawlerManager(ProxyIpCrawlerExecutor proxyIpCrawlerExecutor) {
-        this.proxyIpCrawlerExecutor = proxyIpCrawlerExecutor;
-    }
 
     public void addCrawler(Object bean,Method method) {
         if (method.isAnnotationPresent(ProxyIpCrawler.class)) {
