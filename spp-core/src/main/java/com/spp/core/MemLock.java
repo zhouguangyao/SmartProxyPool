@@ -12,7 +12,9 @@ public class MemLock implements Lockable {
 
     private static final String MEM_LOCK = "MEM_LOCK_%s";
 
-
+    /**
+     * 内存并发map
+     */
     private static ConcurrentHashMap<String, Integer> lockMap = new ConcurrentHashMap();
 
     /**
