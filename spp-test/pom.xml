@@ -13,8 +13,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>spp-common-test</module>
-        <module>spp-core-test</module>
         <module>spp-spring-boot-starter-test</module>
     </modules>
 
