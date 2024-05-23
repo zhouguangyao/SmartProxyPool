@@ -2,23 +2,23 @@ package com.spp.core;
 
 
 import com.alibaba.ttl.TransmittableThreadLocal;
-import com.spp.core.pojo.ProxyIpCrawlerContext;
+import com.spp.core.pojo.Crawler;
 
 /**
  * @author zhougy
  * @date 2024/05/14
  */
-public class ProxyIpCrawlerContextHolder {
-    private static final ThreadLocal<ProxyIpCrawlerContext> holder = new TransmittableThreadLocal();
+public class CrawlerHolder {
+    private static final ThreadLocal<Crawler> holder = new TransmittableThreadLocal();
 
-    public ProxyIpCrawlerContextHolder() {
+    public CrawlerHolder() {
     }
 
     public static void reset() {
         holder.remove();
     }
 
-    public static void set(ProxyIpCrawlerContext item) {
+    public static void set(Crawler item) {
         if (item == null) {
             reset();
         } else {
@@ -26,7 +26,7 @@ public class ProxyIpCrawlerContextHolder {
         }
     }
 
-    public static ProxyIpCrawlerContext get() {
+    public static Crawler get() {
         return holder.get();
     }
 }

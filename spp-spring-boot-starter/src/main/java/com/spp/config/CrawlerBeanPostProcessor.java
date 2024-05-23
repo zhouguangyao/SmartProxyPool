@@ -1,12 +1,11 @@
 package com.spp.config;
 
-import com.spp.core.ProxyIpCrawlerManager;
+import com.spp.core.CrawlerManager;
 import com.spp.core.annotation.ProxyIpCrawler;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Method;
 
 /**
@@ -24,7 +23,7 @@ public class CrawlerBeanPostProcessor implements BeanPostProcessor {
         if (bean.getClass().isAnnotationPresent(ProxyIpCrawler.class)) {
             for (Method method : bean.getClass().getDeclaredMethods()) {
                 if (method.isAnnotationPresent(ProxyIpCrawler.class)) {
-                    ProxyIpCrawlerManager.getInstance().addCrawler(bean, method);
+                    CrawlerManager.getInstance().addAnnotationCrawler(bean, method);
                 }
             }
         }
