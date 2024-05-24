@@ -4,14 +4,13 @@ package com.spp.core;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.spp.common.utils.*;
-import com.spp.core.annotation.ProxyIpCrawler;
 import com.spp.common.enums.*;
 import com.spp.core.enums.CityNameParserEnum;
 import com.spp.core.enums.IpCrawlerTypeEnum;
 import com.spp.core.enums.IpValueParserEnum;
 import com.spp.core.enums.PortValueParserEnum;
 import com.spp.core.pojo.ProxyIp;
-import com.spp.core.pojo.ProxyIpCrawlerContext;
+import com.spp.core.pojo.Crawler;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -32,15 +31,19 @@ import java.util.stream.Collectors;
  * @author zhougy
  * @date 2024/05/14
  */
-public class ProxyIpCrawlerExecutor {
-    private static final Logger log = LoggerFactory.getLogger(ProxyIpCrawlerExecutor.class);
+public class CrawlerExecutor {
+    private static final Logger log = LoggerFactory.getLogger(CrawlerExecutor.class);
 
     private ProxyIpPool proxyIpPool;
 
     private Lockable lockable;
 
-    public ProxyIpCrawlerExecutor(ProxyIpPool proxyIpPool, Lockable lockable) {
+
+    public void setProxyIpPool(ProxyIpPool proxyIpPool) {
         this.proxyIpPool = proxyIpPool;
+    }
+
+    public void setLockable(Lockable lockable) {
         this.lockable = lockable;
     }
 
@@ -54,14 +57,33 @@ public class ProxyIpCrawlerExecutor {
     /**
      * 运行所有爬虫
      */
-    public void executeAll() {
-        List<Future> futures = new ArrayList<>();
-        List<ProxyIpCrawlerContext> crawlers = ProxyIpCrawlerManager.getInstance().getCrawlers();
+    public void executeAllToPool() {
+        List<ProxyIp> ipList = executeAll();
+        // 放入ip池
+        if (ipList != null && ipList.size() > 0) {
+            if(proxyIpPool == null) {
+                log.warn("no proxyIpPool found");
+                return;
+            }
+            // 缓存
+            ipList.forEach(proxyIp -> proxyIpPool.put(proxyIp));
+        }
+    }
+
+    /**
+     * 运行所有爬虫
+     */
+    public List<ProxyIp> executeAll() {
+        List<ProxyIp> ipList = new ArrayList<>();
+        List<Future<List<ProxyIp>>> futures = new ArrayList<>();
+        List<Crawler> crawlers = CrawlerManager.getInstance().getCrawlers();
+        if (crawlers == null || crawlers.isEmpty()) {
+            log.warn("no crawler found");
+            return ipList;
+        }
         crawlers.forEach((context) -> {
             // 提交一个任务
-            Future<?> future = executorService.submit(() -> {
-                execute(context);
-            });
+            Future<List<ProxyIp>> future = executorService.submit(() -> executeOne(context));
             // 添加到future列表
             futures.add(future);
         });
@@ -69,11 +91,15 @@ public class ProxyIpCrawlerExecutor {
         // 等待所有任务完成
         futures.forEach(future -> {
             try {
-                future.get();
+                List<ProxyIp> crawlerIpList = future.get();
+                if (ipList != null && ipList.size() > 0) {
+                    ipList.addAll(crawlerIpList);
+                }
             } catch (Exception e) {
                 log.error("crawler execute error：{}", e);
             }
         });
+        return ipList;
     }
 
     /**
@@ -81,57 +107,71 @@ public class ProxyIpCrawlerExecutor {
      *
      * @param key
      */
-    public void execute(String key) {
-        ProxyIpCrawlerContext context = ProxyIpCrawlerManager.getInstance().getCrawler(key);
-        // 提交一个任务
-        Future<?> future = executorService.submit(() -> {
-            execute(context);
-        });
+    public void executeToPool(String key) {
+        List<ProxyIp> ipList = executeOne(key);
 
-
-        // 等待任务完成
-        try {
-            future.get();
-        } catch (Exception e) {
-            log.error("crawler execute error：{}", e);
+        // 放入ip池
+        if (ipList != null && ipList.size() > 0) {
+            // 缓存
+            ipList.forEach(proxyIp -> proxyIpPool.put(proxyIp));
         }
+    }
+
+
+    /**
+     * 运行单个爬虫
+     *
+     * @param key
+     */
+    public List<ProxyIp> executeOne(String key) {
+        List<ProxyIp> ipList = new ArrayList<>();
+        Crawler crawler = CrawlerManager.getInstance().getCrawler(key);
+        if (crawler == null) {
+            log.warn("no crawler found");
+            return ipList;
+        }
+        // 执行
+        return executeOne(crawler);
     }
 
     /**
      * 运行爬虫
      */
-    public void execute(ProxyIpCrawlerContext context) {
-        ProxyIpCrawler annotation = context.getAnnotation();
-        boolean enable = annotation.enable();
-        String key = annotation.key();
-        String name = annotation.name();
+    private List<ProxyIp> executeOne(Crawler crawler) {
+        boolean enable = crawler.isEnable();
+        String key = crawler.getKey();
+        String name = crawler.getName();
+        List<ProxyIp> ipList = new ArrayList<>();
         if (!enable) {
             log.info("crawler:{} is disable", name);
-            return;
+            return ipList;
         }
 
-        // 读取禁用列表， todo
-        List<String> disableList = null;
+        // 读取禁用列表
+        List<String> disableList = CrawlerManager.getInstance().getDisableList();
         if (disableList!= null && disableList.contains(key)) {
             log.info("crawler:{} is disable", name);
-            return;
+            return ipList;
         }
 
         // 上下文
-        ProxyIpCrawlerContextHolder.set(context);
+        CrawlerHolder.set(crawler);
         // 加锁
-        boolean lock = annotation.lock();
+        boolean lock = crawler.isLock();
         if (lock) {
+            if(lockable == null) {
+                log.warn("no lockable found");
+                return ipList;
+            }
             if (lockable.isExist(key)) {
                 log.info("crawler:{} is running >>>", name);
-                return;
+                return ipList;
             }
             lockable.lock(key);
         }
-        List<ProxyIp> ipList = new ArrayList<>();
         try {
             // 执行
-            ipList = execute();
+            ipList = executeOne();
         } catch (Exception e) {
             log.error("crawler:" + name + " execute is fail", e);
         } finally {
@@ -141,40 +181,35 @@ public class ProxyIpCrawlerExecutor {
             }
         }
 
-        if (ipList != null && ipList.size() > 0) {
-            // 缓存
-            ipList.forEach(proxyIp -> proxyIpPool.put(proxyIp));
-        }
-
         log.info("crawler:{}, execute is success, ip count:{}", name, ipList.size());
+        return ipList;
     }
 
 
     /**
      * 爬虫执行
      */
-    public List<ProxyIp> execute() {
+    private List<ProxyIp> executeOne() {
         List<ProxyIp> ipList = new ArrayList<>();
 
         // 上下文
-        ProxyIpCrawlerContext context = ProxyIpCrawlerContextHolder.get();
-        ProxyIpCrawler annotation = context.getAnnotation();
-        String name = annotation.name();
-        IpCrawlerTypeEnum type = annotation.type();
-        IpValueParserEnum ipValueParser = annotation.ipValueParser();
-        PortValueParserEnum portValueParser = annotation.portValueParser();
-        CityNameParserEnum cityNameParser = annotation.cityNameParser();
-        DateField expireUnit = annotation.expireUnit();
-        int expireOffset = annotation.expireOffset();
+        Crawler crawler = CrawlerHolder.get();
+        String name = crawler.getName();
+        IpCrawlerTypeEnum type = crawler.getType();
+        IpValueParserEnum ipValueParser = crawler.getIpValueParser();
+        PortValueParserEnum portValueParser = crawler.getPortValueParser();
+        CityNameParserEnum cityNameParser = crawler.getCityNameParser();
+        DateField expireUnit = crawler.getExpireUnit();
+        int expireOffset = crawler.getExpireOffset();
 
         // 设置要爬取的总页数
-        int pages = annotation.pages();
+        int pages = crawler.getPages();
 
-        String pageNoDictStr = annotation.pageNoDict();
+        String pageNoDictStr = crawler.getPageNoDict();
         JSONObject pageNoDictJson = StringUtils.isEmpty(pageNoDictStr) ? null : JSONObject.parseObject(pageNoDictStr);
 
         // 基础 URL
-        String baseUrl = annotation.baseUrl();
+        String baseUrl = crawler.getBaseUrl();
         for (int page = 1; page <= pages; page++) {
             // 获取页码
             String pageNo = pageNoDictJson == null ? String.valueOf(page) : pageNoDictJson.getString(String.valueOf(page));
@@ -218,7 +253,7 @@ public class ProxyIpCrawlerExecutor {
                         .filter(ObjectUtil::isNotEmpty)
                         .collect(Collectors.toList());
             } catch (Exception e) {
-                log.error("抓取「{}」{}, 失败：{}", name, url, e);
+                log.error("execute「{}」{}, fail：{}", name, url, e);
             }
 
             // 随机延迟5秒内执行
@@ -226,7 +261,7 @@ public class ProxyIpCrawlerExecutor {
             try {
                 Thread.sleep(random * 1000);
             } catch (InterruptedException e) {
-                log.error("抓取「{}」延迟执行异常:{}", name, e);
+                log.error("execute「{}」delay:{}s error:{}", name, random, e);
             }
         }
 
@@ -244,23 +279,22 @@ public class ProxyIpCrawlerExecutor {
         List<ProxyIp> ipList = new ArrayList<>();
 
         // 上下文
-        ProxyIpCrawlerContext context = ProxyIpCrawlerContextHolder.get();
-        ProxyIpCrawler annotation = context.getAnnotation();
-        IpValueParserEnum ipValueParser = annotation.ipValueParser();
-        PortValueParserEnum portValueParser = annotation.portValueParser();
+        Crawler crawler = CrawlerHolder.get();
+        IpValueParserEnum ipValueParser = crawler.getIpValueParser();
+        PortValueParserEnum portValueParser = crawler.getPortValueParser();
 
-        log.info("抓取「{}」{}", annotation.name(), url);
+        log.info("execute html start「{}」{}", crawler.getName(), url);
         Connection connect = Jsoup.connect(url);
         Document doc = connect.get();
 
-        Elements rows = doc.select(annotation.rowsSelector());
+        Elements rows = doc.select(crawler.getRowsSelector());
         for (int i = 0; i < rows.size(); i++) {
-            if (i == annotation.headRowIndex()) {
+            if (i == crawler.getHeadRowIndex()) {
                 continue;
             }
             Element row = rows.get(i);
 
-            Elements cells = row.select(annotation.cellSelector());
+            Elements cells = row.select(crawler.getCellSelector());
 
             int size = cells.size();
             if (size <= 0) {
@@ -269,28 +303,28 @@ public class ProxyIpCrawlerExecutor {
 
             String ip = null;
             // 存在ip列
-            if (annotation.ipIndex() <= (size - 1)) {
+            if (crawler.getIpIndex() <= (size - 1)) {
                 if (ipValueParser.equals(IpValueParserEnum.DEFAULT)) {
-                    ip = cells.get(annotation.ipIndex()).text();
+                    ip = cells.get(crawler.getIpIndex()).text();
                 } else {
-                    ip = cells.get(annotation.ipIndex()).html();
+                    ip = cells.get(crawler.getIpIndex()).html();
                 }
             }
 
             // 存在端口列
             String port = null;
-            if (annotation.portIndex() <= (size - 1)) {
+            if (crawler.getPortIndex() <= (size - 1)) {
                 if (portValueParser.equals(PortValueParserEnum.DEFAULT)) {
-                    port = cells.get(annotation.portIndex()).text();
+                    port = cells.get(crawler.getPortIndex()).text();
                 } else {
-                    port = cells.get(annotation.portIndex()).html();
+                    port = cells.get(crawler.getPortIndex()).html();
                 }
             }
 
             // 存在城市列
             String city = null;
-            if (annotation.cityIndex() <= (size - 1)) {
-                city = cells.get(annotation.cityIndex()).text();
+            if (crawler.getCityIndex() <= (size - 1)) {
+                city = cells.get(crawler.getCityIndex()).text();
             }
 
             // 无效的行
@@ -302,6 +336,7 @@ public class ProxyIpCrawlerExecutor {
             Integer portInt = Integer.valueOf(port);
             ipList.add(buildProxyIp(city, ip, portInt));
         }
+        log.info("execute html end「{}」{}", crawler.getName(), url);
         return ipList;
     }
 
@@ -315,24 +350,25 @@ public class ProxyIpCrawlerExecutor {
         List<ProxyIp> ipList = new ArrayList<>();
 
         // 上下文
-        ProxyIpCrawlerContext context = ProxyIpCrawlerContextHolder.get();
-        ProxyIpCrawler annotation = context.getAnnotation();
+        Crawler crawler = CrawlerHolder.get();
 
+        log.info("execute json start「{}」{}", crawler.getName(), url);
         String body = HttpUtil.get(url);
         JSONObject jsonObject = JSONObject.parseObject(body);
 
-        JSONArray jsonArray = jsonObject.getJSONArray(annotation.rowsParser());
+        JSONArray jsonArray = jsonObject.getJSONArray(crawler.getRowsParser());
         for (Object obj : jsonArray) {
 
             JSONObject item = (JSONObject) obj;
-            String ip = item.getString(annotation.ipParser());
-            String port = item.getString(annotation.portParser());
-            String city = item.getString(annotation.cityParser());
+            String ip = item.getString(crawler.getIpParser());
+            String port = item.getString(crawler.getPortParser());
+            String city = item.getString(crawler.getCityParser());
 
             // 保存
             Integer portInt = Integer.valueOf(port);
             ipList.add(buildProxyIp(city, ip, portInt));
         }
+        log.info("execute json start「{}」{}", crawler.getName(), url);
         return ipList;
     }
 

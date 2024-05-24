@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ProxyIpCrawler
-public class IpCrawler {
+public class TestIpCrawler {
 
     /**
      * 快代理
@@ -29,8 +29,6 @@ public class IpCrawler {
             lock = true)
     public void kuaidaili() {
     }
-
-    ;
 
     /**
      * 站大爷
