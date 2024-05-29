@@ -90,10 +90,9 @@ public class CrawlerManager {
     public void addCrawler(Crawler crawler) {
         String key = crawler.getKey();
         String name = crawler.getName();
-        boolean lock = crawler.isLock();
         // Store the method in the map
         crawlerMap.put(key, crawler);
-        log.info("LOAD crawler>>>[{}-{}]-{}, lock:{}", key, name, lock);
+        log.info("LOAD crawler>>>[{}-{}], info:{}", key, name, crawler);
     }
 
     public Crawler getCrawler(String key) {

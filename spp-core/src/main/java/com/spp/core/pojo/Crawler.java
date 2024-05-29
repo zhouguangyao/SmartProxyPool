@@ -280,4 +280,34 @@ public class Crawler {
     public void setLock(boolean lock) {
         this.lock = lock;
     }
+
+    @Override
+    public String toString() {
+        return "Crawler{" +
+                "value='" + value + '\'' +
+                ", enable=" + enable +
+                ", key='" + key + '\'' +
+                ", name='" + name + '\'' +
+                ", baseUrl='" + baseUrl + '\'' +
+                ", pages=" + pages +
+                ", pageNoDict='" + pageNoDict + '\'' +
+                ", type=" + type +
+                ", rowsParser='" + rowsParser + '\'' +
+                ", ipParser='" + ipParser + '\'' +
+                ", portParser='" + portParser + '\'' +
+                ", cityParser='" + cityParser + '\'' +
+                ", rowsSelector='" + rowsSelector + '\'' +
+                ", cellSelector='" + cellSelector + '\'' +
+                ", headRowIndex=" + headRowIndex +
+                ", ipIndex=" + ipIndex +
+                ", ipValueParser=" + ipValueParser +
+                ", portIndex=" + portIndex +
+                ", portValueParser=" + portValueParser +
+                ", cityIndex=" + cityIndex +
+                ", cityNameParser=" + cityNameParser +
+                ", expireUnit=" + expireUnit +
+                ", expireOffset=" + expireOffset +
+                ", lock=" + lock +
+                '}';
+    }
 }
