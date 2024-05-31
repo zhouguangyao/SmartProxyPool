@@ -2,7 +2,7 @@ package com.spp;
 
 
 import com.alibaba.fastjson.JSON;
-import com.spp.config.SppSpringExecutor;
+import com.spp.core.CrawlerExecutor;
 import com.spp.core.ProxyIpPool;
 import com.spp.core.pojo.ProxyIp;
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class CrawlerTest {
     private ProxyIpPool proxyIpPool;
 
     @Resource
-    private SppSpringExecutor executor;
+    private CrawlerExecutor executor;
 
 
     /**
