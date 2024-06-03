@@ -19,7 +19,17 @@ public class SppSpringExecutor extends CrawlerExecutor {
     private Lockable lockable;
 
     public SppSpringExecutor() {
-        setProxyIpPool(proxyIpPool);
-        setLockable(lockable);
+    }
+
+
+    @Override
+    public ProxyIpPool getProxyIpPool() {
+        return proxyIpPool;
+    }
+
+
+    @Override
+    public Lockable getLockable() {
+        return lockable;
     }
 }

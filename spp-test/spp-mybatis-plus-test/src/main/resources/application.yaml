@@ -1,0 +1,50 @@
+#########################################
+# spring profiles configuration
+#########################################
+spring:
+  profiles:
+#    active: @env@
+    active: dev
+#    active: test
+#    active: prod
+
+#########################################
+# spp configuration
+#########################################
+
+spp:
+  #########################################
+  # crawlers configuration
+  #########################################
+  crawlers:
+    - key: htmlCrawler1
+      enable: true
+      name: html示例爬虫1
+      baseUrl: http://www.example.com
+      pages: 1
+      pageNoDict: "{1:\"b97827cc\", 2:\"f8a0e15f\"}"
+      type: HTML
+      rowsParser: data
+      rowsSelector: div.table-responsive table tbody tr
+      cellSelector: td
+      headRowIndex: 0
+      ipIndex: 0
+      ipValueParser: DEFAULT
+      portIndex: 1
+      portValueParser: DEFAULT
+      cityIndex: 2
+      cityNameParser: DEFAULT
+      expireUnit: MINUTE
+      expireOffset: 10
+      lock: false
+    - key: jsonCrawler1
+      enable: true
+      name: json示例爬虫1
+      baseUrl: http://www.example.com
+      type: JSON
+      rowsParser: data
+      cityNameParser: DEFAULT
+      expireUnit: MINUTE
+      expireOffset: 10
+      lock: false
+

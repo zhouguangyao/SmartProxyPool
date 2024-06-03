@@ -36,8 +36,6 @@ public class CrawlerTest {
         System.out.println(JSON.toJSONString(ipList));
 
     }
-
-
     /**
      * 抓取单个数据源
      */
@@ -46,6 +44,8 @@ public class CrawlerTest {
         executor.executeToPool("zdaye");
 
     }
+
+
     /**
      * 抓取全部数据源
      */
@@ -74,7 +74,7 @@ public class CrawlerTest {
         siteList.forEach(site -> {
             // 提交一个任务
             Future<List<ProxyIp>> future = executorService.submit(() ->
-                executor.executeOne(site)
+                    executor.executeOne(site)
             );
             futures.add(future);
         });

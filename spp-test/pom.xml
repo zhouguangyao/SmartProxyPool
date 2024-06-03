@@ -14,6 +14,8 @@
 
     <modules>
         <module>spp-spring-boot-starter-test</module>
+        <module>spp-mybatis-plus-test</module>
+        <module>spp-redis-test</module>
     </modules>
     <properties>
         <maven.install.skip>true</maven.install.skip>

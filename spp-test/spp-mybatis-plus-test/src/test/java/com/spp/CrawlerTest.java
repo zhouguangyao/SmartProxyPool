@@ -37,7 +37,6 @@ public class CrawlerTest {
 
     }
 
-
     /**
      * 抓取单个数据源
      */
@@ -46,6 +45,7 @@ public class CrawlerTest {
         executor.executeToPool("zdaye");
 
     }
+
     /**
      * 抓取全部数据源
      */

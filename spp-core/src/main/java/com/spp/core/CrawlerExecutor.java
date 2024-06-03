@@ -31,21 +31,13 @@ import java.util.stream.Collectors;
  * @author zhougy
  * @date 2024/05/14
  */
-public class CrawlerExecutor {
+public abstract class CrawlerExecutor {
     private static final Logger log = LoggerFactory.getLogger(CrawlerExecutor.class);
 
-    private ProxyIpPool proxyIpPool;
+    public abstract ProxyIpPool getProxyIpPool();
 
-    private Lockable lockable;
+    public abstract Lockable getLockable();
 
-
-    public void setProxyIpPool(ProxyIpPool proxyIpPool) {
-        this.proxyIpPool = proxyIpPool;
-    }
-
-    public void setLockable(Lockable lockable) {
-        this.lockable = lockable;
-    }
 
     ExecutorService executorService = new ThreadPoolExecutor(
             5,
@@ -61,12 +53,12 @@ public class CrawlerExecutor {
         List<ProxyIp> ipList = executeAll();
         // 放入ip池
         if (ipList != null && ipList.size() > 0) {
-            if(proxyIpPool == null) {
+            if(this.getProxyIpPool() == null) {
                 log.warn("no proxyIpPool found");
                 return;
             }
             // 缓存
-            ipList.forEach(proxyIp -> proxyIpPool.put(proxyIp));
+            ipList.forEach(proxyIp -> this.getProxyIpPool().put(proxyIp));
         }
     }
 
@@ -113,7 +105,7 @@ public class CrawlerExecutor {
         // 放入ip池
         if (ipList != null && ipList.size() > 0) {
             // 缓存
-            ipList.forEach(proxyIp -> proxyIpPool.put(proxyIp));
+            ipList.forEach(proxyIp -> this.getProxyIpPool().put(proxyIp));
         }
     }
 
@@ -159,15 +151,15 @@ public class CrawlerExecutor {
         // 加锁
         boolean lock = crawler.isLock();
         if (lock) {
-            if(lockable == null) {
+            if(this.getLockable() == null) {
                 log.warn("no lockable found");
                 return ipList;
             }
-            if (lockable.isExist(key)) {
+            if (this.getLockable().isExist(key)) {
                 log.info("crawler:{} is running >>>", name);
                 return ipList;
             }
-            lockable.lock(key);
+            this.getLockable().lock(key);
         }
         try {
             // 执行
@@ -177,7 +169,7 @@ public class CrawlerExecutor {
         } finally {
             // 解锁
             if (lock) {
-                lockable.unlock(key);
+                this.getLockable().unlock(key);
             }
         }
 
