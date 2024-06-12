@@ -42,12 +42,22 @@ public class CrawlerManager {
      * @param method
      */
     public void addAnnotationCrawler(Object bean,Method method) {
+        addAnnotationCrawler(bean.getClass(), method);
+    }
+
+
+    /**
+     * 添加注解爬虫
+     * @param cls
+     * @param method
+     */
+    public void addAnnotationCrawler(Class<?> cls, Method method) {
         if (method.isAnnotationPresent(ProxyIpCrawler.class)) {
             ProxyIpCrawler annotation = method.getAnnotation(ProxyIpCrawler.class);
             String key = annotation.key();
             String name = annotation.name();
             boolean lock = annotation.lock();
-            String beanName = bean.getClass().getName();
+            String beanName = cls.getName();
             if (key == null || "".equals(key)) {
                 key = beanName + "." + method.getName();
             }

@@ -63,6 +63,60 @@ spp:
 ```
 
 
+### 注解接口(interface)配置
+包含html和json两种类型爬虫，可以根据需求选择。
+``` java
+package com.spp.crawler;
+
+import com.spp.core.annotation.ProxyIpCrawler;
+import com.spp.core.enums.CityNameParserEnum;
+import com.spp.core.enums.IpCrawlerTypeEnum;
+import com.spp.core.enums.IpValueParserEnum;
+import org.springframework.stereotype.Component;
+
+@ProxyIpCrawler
+public class TestIpCrawlerInterface {
+
+    /**
+     * HTML-快代理
+     */
+    @ProxyIpCrawler(key = "kuaidaili", name = "快代理",
+            baseUrl = "https://www.kuaidaili.com/free/inha/%s/", pages = 10,
+            rowsSelector = "table tbody tr", cellSelector = "td",
+            headRowIndex = -1, ipIndex = 0, portIndex = 1, cityIndex = 5, cityNameParser = CityNameParserEnum.CN_STYLE1,
+            lock = true)
+    void kuaidaili();
+
+
+    /**
+     * JSON-geonode
+     * {
+     * "_id": "6325466d2fb0f02dd5699cb8",
+     * "ip": "119.91.35.77",
+     * "anonymityLevel": "elite",
+     * "asn": "AS45090",
+     * "city": "Chaowai",
+     * "country": "CN",
+     * "created_at": "2022-09-17T04:00:45.562Z",
+     * "google": false,
+     * "isp": "China Internet Network Information Center",
+     * "lastChecked": 1709779200,
+     * "latency": 208.798,
+     * "org": "Tencent cloud computing (Beijing) Co., Ltd.",
+     * "port": "2080",
+     * "protocols": [
+     * "socks4"
+     * ]
+     */
+    @ProxyIpCrawler(key = "geonode", name = "geonode",
+            baseUrl = "https://proxylist.geonode.com/api/proxy-list?country=CN&anonymityLevel=elite&filterLastChecked=10&limit=500&page=1&sort_by=lastChecked&sort_type=desc",
+            type = IpCrawlerTypeEnum.JSON,
+            rowsParser = "data", cityNameParser = CityNameParserEnum.CN_PINYIN)
+    void geonode();
+
+}
+```
+
 ### 注解类配置
 包含html和json两种类型爬虫，可以根据需求选择。
 ``` java
