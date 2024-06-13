@@ -75,7 +75,7 @@ import com.spp.core.enums.IpValueParserEnum;
 import org.springframework.stereotype.Component;
 
 @ProxyIpCrawler
-public class TestIpCrawlerInterface {
+public interface TestIpCrawlerInterface {
 
     /**
      * HTML-快代理
@@ -265,15 +265,21 @@ public class MainTest {
     @Resource
     private SppSpringExecutor executor;
 
+    @Resource
+    private ProxyIpPool proxyIpPool;
+
 
     @Test
     public void runCrawler() {
         // 抓取数据源ip资源
         List<ProxyIp> ipList = executor.executeOne("kuaidaili");
     }
+    
 
-    @Resource
-    private ProxyIpPool proxyIpPool;
+    @Test
+    public void runCrawlerToPool() {
+        executor.executeToPool("zdaye");
+    }
 
     @Test
     public void getProxyIp() {

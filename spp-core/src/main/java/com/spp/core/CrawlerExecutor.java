@@ -50,15 +50,22 @@ public abstract class CrawlerExecutor {
      * 运行所有爬虫
      */
     public void executeAllToPool() {
+        executeAllToPool(getProxyIpPool());
+    }
+
+    /**
+     * 运行所有爬虫
+     */
+    public void executeAllToPool(ProxyIpPool proxyIpPool) {
+        if(proxyIpPool == null) {
+            log.warn("no proxyIpPool found");
+            return;
+        }
         List<ProxyIp> ipList = executeAll();
         // 放入ip池
         if (ipList != null && ipList.size() > 0) {
-            if(this.getProxyIpPool() == null) {
-                log.warn("no proxyIpPool found");
-                return;
-            }
             // 缓存
-            ipList.forEach(proxyIp -> this.getProxyIpPool().put(proxyIp));
+            ipList.forEach(proxyIp -> proxyIpPool.put(proxyIp));
         }
     }
 
@@ -100,12 +107,21 @@ public abstract class CrawlerExecutor {
      * @param key
      */
     public void executeToPool(String key) {
+        executeToPool(key, this.getProxyIpPool());
+    }
+
+    /**
+     * 运行单个爬虫
+     *
+     * @param key
+     */
+    public void executeToPool(String key, ProxyIpPool proxyIpPool) {
         List<ProxyIp> ipList = executeOne(key);
 
         // 放入ip池
         if (ipList != null && ipList.size() > 0) {
             // 缓存
-            ipList.forEach(proxyIp -> this.getProxyIpPool().put(proxyIp));
+            ipList.forEach(proxyIp -> proxyIpPool.put(proxyIp));
         }
     }
 

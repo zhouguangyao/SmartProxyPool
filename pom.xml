@@ -71,6 +71,7 @@
         <dynamic-datasource.version>3.5.0</dynamic-datasource.version>
         <mysql-connector.version>8.0.28</mysql-connector.version>
         <commons-pool2.version>2.11.1</commons-pool2.version>
+        <hutool.version>5.8.28</hutool.version>
     </properties>
 
     <dependencyManagement>
@@ -160,6 +161,12 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-pool2</artifactId>
                 <version>${commons-pool2.version}</version>
+            </dependency>
+            <!-- hutool -->
+            <dependency>
+                <groupId>cn.hutool</groupId>
+                <artifactId>hutool-core</artifactId>
+                <version>${hutool.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
