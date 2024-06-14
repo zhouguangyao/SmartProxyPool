@@ -29,11 +29,11 @@ spp:
       cellSelector: td
       headRowIndex: 0
       ipIndex: 0
-      ipValueParser: DEFAULT
+      ipValueParser: com.spp.core.strategy.DefaultParser
       portIndex: 1
-      portValueParser: DEFAULT
+      portValueParser: com.spp.core.strategy.DefaultParser
       cityIndex: 2
-      cityNameParser: DEFAULT
+      cityNameParser: com.spp.core.strategy.DefaultParser
       expireUnit: MINUTE
       expireOffset: 10
       lock: false
@@ -43,7 +43,7 @@ spp:
       baseUrl: http://www.example.com
       type: JSON
       rowsParser: data
-      cityNameParser: DEFAULT
+      cityNameParser: com.spp.core.strategy.DefaultParser
       expireUnit: MINUTE
       expireOffset: 10
       lock: false

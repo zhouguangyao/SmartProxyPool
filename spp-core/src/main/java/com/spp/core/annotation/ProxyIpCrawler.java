@@ -2,10 +2,9 @@
 package com.spp.core.annotation;
 
 import com.spp.common.enums.DateField;
-import com.spp.core.enums.CityNameParserEnum;
 import com.spp.core.enums.IpCrawlerTypeEnum;
-import com.spp.core.enums.IpValueParserEnum;
-import com.spp.core.enums.PortValueParserEnum;
+import com.spp.core.strategy.AbstractParserStrategy;
+import com.spp.core.strategy.DefaultParser;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -74,19 +73,19 @@ public @interface ProxyIpCrawler {
     int ipIndex() default 0;
 
     /** ip值策略 **/
-    IpValueParserEnum ipValueParser() default IpValueParserEnum.DEFAULT;
+    Class<? extends AbstractParserStrategy> ipValueParser() default DefaultParser.class;
 
     /** 端口下标 **/
     int portIndex() default 1;
 
     /** 端口值策略 **/
-    PortValueParserEnum portValueParser() default PortValueParserEnum.DEFAULT;
+    Class<? extends AbstractParserStrategy> portValueParser() default DefaultParser.class;
 
     /** 城市下标 **/
     int cityIndex() default 2;
 
     /** 城市解析策略 **/
-    CityNameParserEnum cityNameParser() default CityNameParserEnum.DEFAULT;
+    Class<? extends AbstractParserStrategy> cityNameParser() default DefaultParser.class;
 
     /** 过期时间单位 **/
     DateField expireUnit() default DateField.MINUTE;

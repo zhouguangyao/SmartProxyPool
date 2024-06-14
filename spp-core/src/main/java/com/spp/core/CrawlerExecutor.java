@@ -3,14 +3,13 @@ package com.spp.core;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.spp.common.enums.DateField;
 import com.spp.common.utils.*;
-import com.spp.common.enums.*;
-import com.spp.core.enums.CityNameParserEnum;
 import com.spp.core.enums.IpCrawlerTypeEnum;
-import com.spp.core.enums.IpValueParserEnum;
-import com.spp.core.enums.PortValueParserEnum;
-import com.spp.core.pojo.ProxyIp;
 import com.spp.core.pojo.Crawler;
+import com.spp.core.pojo.ProxyIp;
+import com.spp.core.strategy.AbstractParserStrategy;
+import com.spp.core.strategy.DefaultParser;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -204,9 +203,9 @@ public abstract class CrawlerExecutor {
         Crawler crawler = CrawlerHolder.get();
         String name = crawler.getName();
         IpCrawlerTypeEnum type = crawler.getType();
-        IpValueParserEnum ipValueParser = crawler.getIpValueParser();
-        PortValueParserEnum portValueParser = crawler.getPortValueParser();
-        CityNameParserEnum cityNameParser = crawler.getCityNameParser();
+        Class<? extends AbstractParserStrategy> ipValueParser = crawler.getIpValueParser();
+        Class<? extends AbstractParserStrategy> portValueParser = crawler.getPortValueParser();
+        Class<? extends AbstractParserStrategy> cityNameParser = crawler.getCityNameParser();
         DateField expireUnit = crawler.getExpireUnit();
         int expireOffset = crawler.getExpireOffset();
 
@@ -241,13 +240,13 @@ public abstract class CrawlerExecutor {
                                 return null;
                             }
                             // 解析ip
-                            String ip = ipValueParser.parse(proxyIp.getIp());
+                            String ip = StrategyUtil.parse(ipValueParser, proxyIp.getIp());
 
                             // 解析port
-                            String port = portValueParser.parse(proxyIp.getPort() + "");
+                            String port = StrategyUtil.parse(portValueParser,proxyIp.getPort() + "");
 
                             // 解析城市
-                            String city = cityNameParser.parse(proxyIp.getCity());
+                            String city = StrategyUtil.parse(cityNameParser, proxyIp.getCity());
                             if (StringUtils.isEmpty(city)) {
                                 return null;
                             }
@@ -288,8 +287,8 @@ public abstract class CrawlerExecutor {
 
         // 上下文
         Crawler crawler = CrawlerHolder.get();
-        IpValueParserEnum ipValueParser = crawler.getIpValueParser();
-        PortValueParserEnum portValueParser = crawler.getPortValueParser();
+        Class<? extends AbstractParserStrategy> ipValueParser = crawler.getIpValueParser();
+        Class<? extends AbstractParserStrategy> portValueParser = crawler.getPortValueParser();
 
         log.info("execute html start「{}」{}", crawler.getName(), url);
         Connection connect = Jsoup.connect(url);
@@ -312,7 +311,7 @@ public abstract class CrawlerExecutor {
             String ip = null;
             // 存在ip列
             if (crawler.getIpIndex() <= (size - 1)) {
-                if (ipValueParser.equals(IpValueParserEnum.DEFAULT)) {
+                if (ipValueParser.equals(DefaultParser.class)) {
                     ip = cells.get(crawler.getIpIndex()).text();
                 } else {
                     ip = cells.get(crawler.getIpIndex()).html();
@@ -322,7 +321,7 @@ public abstract class CrawlerExecutor {
             // 存在端口列
             String port = null;
             if (crawler.getPortIndex() <= (size - 1)) {
-                if (portValueParser.equals(PortValueParserEnum.DEFAULT)) {
+                if (portValueParser.equals(DefaultParser.class)) {
                     port = cells.get(crawler.getPortIndex()).text();
                 } else {
                     port = cells.get(crawler.getPortIndex()).html();

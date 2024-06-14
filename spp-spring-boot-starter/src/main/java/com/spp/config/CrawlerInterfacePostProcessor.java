@@ -26,7 +26,7 @@ public class CrawlerInterfacePostProcessor implements BeanDefinitionRegistryPost
         Set<Class<?>> interfaces = ClassUtil.scanPackageByAnnotation("", ProxyIpCrawler.class);
 
         for (Class<?> cls : interfaces) {
-            if (cls.isInterface() && cls.isAnnotationPresent(ProxyIpCrawler.class)) {
+            if (cls.isAnnotationPresent(ProxyIpCrawler.class)) {
                 for (Method method : cls.getDeclaredMethods()) {
                     if (method.isAnnotationPresent(ProxyIpCrawler.class)) {
                         CrawlerManager.getInstance().addAnnotationCrawler(cls, method);

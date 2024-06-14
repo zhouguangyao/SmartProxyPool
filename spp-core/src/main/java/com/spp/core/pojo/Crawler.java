@@ -2,11 +2,9 @@
 package com.spp.core.pojo;
 
 import com.spp.common.enums.DateField;
-import com.spp.core.enums.CityNameParserEnum;
 import com.spp.core.enums.IpCrawlerTypeEnum;
-import com.spp.core.enums.IpValueParserEnum;
-import com.spp.core.enums.PortValueParserEnum;
-
+import com.spp.core.strategy.AbstractParserStrategy;
+import com.spp.core.strategy.DefaultParser;
 
 
 /**
@@ -65,19 +63,19 @@ public class Crawler {
     private Integer ipIndex = 0;
 
     /** ip值策略 **/
-    private IpValueParserEnum ipValueParser = IpValueParserEnum.DEFAULT;
+    private Class<? extends AbstractParserStrategy> ipValueParser = DefaultParser.class;
 
     /** 端口下标 **/
     private Integer portIndex = 1;
 
     /** 端口值策略 **/
-    private PortValueParserEnum portValueParser = PortValueParserEnum.DEFAULT;
+    private Class<? extends AbstractParserStrategy> portValueParser = DefaultParser.class;
 
     /** 城市下标 **/
     private Integer cityIndex = 2;
 
     /** 城市解析策略 **/
-    private CityNameParserEnum cityNameParser;
+    private Class<? extends AbstractParserStrategy> cityNameParser = DefaultParser.class;
 
     /** 过期时间单位 **/
     private DateField expireUnit = DateField.MINUTE;
@@ -217,11 +215,11 @@ public class Crawler {
         this.ipIndex = ipIndex;
     }
 
-    public IpValueParserEnum getIpValueParser() {
+    public Class<? extends AbstractParserStrategy> getIpValueParser() {
         return ipValueParser;
     }
 
-    public void setIpValueParser(IpValueParserEnum ipValueParser) {
+    public void setIpValueParser(Class<? extends AbstractParserStrategy> ipValueParser) {
         this.ipValueParser = ipValueParser;
     }
 
@@ -233,11 +231,11 @@ public class Crawler {
         this.portIndex = portIndex;
     }
 
-    public PortValueParserEnum getPortValueParser() {
+    public Class<? extends AbstractParserStrategy> getPortValueParser() {
         return portValueParser;
     }
 
-    public void setPortValueParser(PortValueParserEnum portValueParser) {
+    public void setPortValueParser(Class<? extends AbstractParserStrategy> portValueParser) {
         this.portValueParser = portValueParser;
     }
 
@@ -249,11 +247,11 @@ public class Crawler {
         this.cityIndex = cityIndex;
     }
 
-    public CityNameParserEnum getCityNameParser() {
+    public Class<? extends AbstractParserStrategy> getCityNameParser() {
         return cityNameParser;
     }
 
-    public void setCityNameParser(CityNameParserEnum cityNameParser) {
+    public void setCityNameParser(Class<? extends AbstractParserStrategy> cityNameParser) {
         this.cityNameParser = cityNameParser;
     }
 
